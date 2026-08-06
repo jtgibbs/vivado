@@ -1,0 +1,9 @@
+build/
+xsim.dir/
+.Xil/
+*.jou
+*.log
+*.pb
+*.wdb
+*.vcd
+webtalk*
