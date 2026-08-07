@@ -79,19 +79,46 @@ Spot at $0.076/hr is tempting and mostly fine here — the work is
 checkpoint-and-resume by nature — but a two-minute interruption notice during a
 40-minute install is a bad trade. Install on-demand; consider spot afterwards.
 
-## Licensing
+## Licensing — install 2025.x, not 2026.1
 
-**Vivado ML Standard is free and needs no licence file.** It covers Spartan-7,
-Artix-7, selected Zynq-7000 and some Kintex-7 — `xc7a35t` is in. Requires an AMD
-account to download. Not a time-limited trial.
+**Pin the version.** Install **Vivado ML Standard 2025.x**. This is a deliberate
+choice, not inertia, and it is the single biggest risk to this whole plan.
+
+Through 2025.x, Vivado ML Standard is free, needs no licence file, and covers
+Spartan-7, Artix-7, selected Zynq-7000 and some Kintex-7 — `xc7a35t` is in. Not a
+time-limited trial.
+
+**From 2026.1 (June 2026) AMD replaced that with a five-tier model** — BASIC
+(free, *annual renewal*), CORE (~$1,200–1,800/yr), PRO (~$2,400–3,000/yr),
+ENTERPRISE (~$4,395–5,495 perpetual), GOLD (~$10–15K). Widespread reporting says
+**the free BASIC tier excludes Linux**, with native Linux use landing in CORE.
+
+Confidence, stated honestly: that Linux exclusion is reported by multiple
+outlets, but as of May 2026 AMD had **not fully clarified it**, and sources
+contradict each other on whether BASIC covers Linux at all. Do not plan around
+either reading without confirming it against AMD directly.
+
+This entire flow is Linux — the whole point of the instance. So:
+
+- **2025.x removes the question.** The change applies from 2026.1 forward.
+  `run.tcl` is version-agnostic and nothing here needs a 2026.1 feature.
+- The second-order risk is worse than the price: BASIC requires **annual
+  renewal**, and reporting suggests designs can become unusable if you lapse.
+  For a portfolio repo meant to stay reproducible for years, a licence that
+  expires is a defect.
+- Revisit only when AMD has published unambiguous Linux terms, or when something
+  here actually needs a newer release. Neither is true today.
+
+If you do end up needing 2026.1+ on Linux, budget for CORE and price it before
+launching the instance, not after.
 
 ## Sequence
 
 1. Launch `c7i.xlarge`, Ubuntu LTS, 100 GB gp3, key pair, security group
    allowing SSH from your IP only — **not** `0.0.0.0/0`.
-2. Install Vivado ML Standard, selecting **only** Artix-7 under
-   Devices → Production Devices → 7 Series. Selecting everything is ~200 GB and
-   buys nothing.
+2. Install Vivado ML Standard **2025.x** (see Licensing — do not take 2026.1),
+   selecting **only** Artix-7 under Devices → Production Devices → 7 Series.
+   Selecting everything is ~200 GB and buys nothing.
 3. `rsync -a fpga/cdc_corruption_a7/ instance:cdc_corruption_a7/` — the directory
    is self-contained by design, `rtl/` holds real copies rather than `../`
    references. Nothing else from the repo is needed.
@@ -126,6 +153,7 @@ Called out where they will bite, but worth knowing in advance:
 
 - [AMD Vivado memory recommendations](https://docs.google.com/spreadsheets/d/1dSPo0sMx14Y513ix39iYsVnmUvQM_2pFeZpllw-Bi28/edit) (AMD's published table, linked from [UG973](https://docs.amd.com/r/en-US/ug973-vivado-release-notes-install-license/System-Memory-Recommendations))
 - [Vivado edition / device support](https://pcbsync.com/xilinx-vivado-editions/)
+- 2026.1 licensing change: [AMD licensing options](https://www.amd.com/en/products/software/adaptive-socs-and-fpgas/vivado/vivado-licensing-options.html) · [analysis](https://bard0.com/insights/vivado-2026-1-licensing.html) · [Tom's Hardware on the Linux exclusion](https://www.tomshardware.com/software/linux/amd-leaves-linux-fpga-users-in-the-lurch-with-controversial-vivado-licensing-update-new-tier-model-restricts-future-free-versions-to-windows)
 - [Install size by device selection](https://adaptivesupport.amd.com/s/question/0D54U00005cVQZbSAO/vivado-20221-ml-standard-without-any-device-support-requires-118gb-disk-space-is-this-right?language=en_US)
 - [c7i.xlarge](https://instances.vantage.sh/aws/ec2/c7i.xlarge) · [c7i.2xlarge](https://instances.vantage.sh/aws/ec2/c7i.2xlarge) pricing
 - [EBS pricing](https://aws.amazon.com/ebs/pricing)
