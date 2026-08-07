@@ -308,6 +308,7 @@ a green timing summary is not evidence of a safe design.
 | `report_cdc.tcl` | the CDC + constraint audit, with the known-answer check |
 | `unisim_stub.v` | stub `BUFG`/`STARTUPE2` for the laptop smoke test only |
 | `Makefile` | one word per stage |
+| `SETUP.md` | EC2 instance sizing, Vivado install, cost, first-run sequence |
 
 Target is the Arty A7-35T (`xc7a35ticsg324-1L`); the part and the pin section of
 the XDC are the only board-specific lines.
@@ -323,7 +324,8 @@ trigger, first tear caught at 2345 ns, 400 ns window dumped at 27 KB instead of
 is therefore proven; only the `run.tcl` wrapper around it is unrun.
 
 **Not yet run under Vivado.** There is no Vivado on the Mac, so `synth`, `impl`,
-`cdc` and `timing` are unexecuted. Expect first-contact friction in two specific
+`cdc` and `timing` are unexecuted. [SETUP.md](SETUP.md) has the instance sizing,
+install, cost and first-run sequence. Expect first-contact friction in two specific
 places, both commented where they will bite:
 
 - the cell-name regexes in the XDC (`ASYNC_REG`, `set_max_delay`,
