@@ -15,6 +15,7 @@
 #   make wave     open the last VCD in GTKWave
 #   make gui      open the routed checkpoint in the Vivado GUI (use over DCV)
 #   make check-sync  prove rtl/ still matches the iCE40 sources
+#                  (needs a checkout: make check-sync ICEBREAKER=path/to/icebreaker)
 #   make sync     re-copy rtl/ from them
 #   make clean
 #
@@ -69,11 +70,17 @@ TRAP_PAD ?= 200
 IVFLAGS = -g2012 -DBAUD_DEFAULT=6250000 -DHIER_OK
 IVSRC   = -s tb_cdc_corruption tb_cdc_corruption.sv $(RTL) unisim_stub.v
 
-# Where rtl/ came from. Only used by check-sync / sync, and only meaningful
-# inside the repo — the project itself never reads these paths.
-UPSTREAM = ../cdc_corruption/corrupt.v ../cdc_corruption/readout.v \
-           ../counter_readout/cdc_capture.v \
-           ../uart_echo/uart_rx.v ../uart_echo/uart_tx.v
+# Where rtl/ came from: the iCE40 repo these cores were lifted from, unchanged.
+# That repo is NOT a dependency — nothing in the build reads these paths, and the
+# normal state (here, and on the instance) is that it simply is not present.
+# Point ICEBREAKER at a checkout to re-verify the copies; see rtl/PROVENANCE.md
+# for the exact commit they were taken from.
+ICEBREAKER ?= ../../icebreaker
+UPSTREAM = $(ICEBREAKER)/fpga/cdc_corruption/corrupt.v \
+           $(ICEBREAKER)/fpga/cdc_corruption/readout.v \
+           $(ICEBREAKER)/fpga/counter_readout/cdc_capture.v \
+           $(ICEBREAKER)/fpga/uart_echo/uart_rx.v \
+           $(ICEBREAKER)/fpga/uart_echo/uart_tx.v
 
 .PHONY: help smoke trap-skew behav sim synth cdc impl timing trap all wave gui check-sync sync clean
 
@@ -189,7 +196,7 @@ wave:
 # lie. These two targets make the claim checkable instead of asserted.
 check-sync:
 	@ok=1; for f in $(UPSTREAM); do b=`basename $$f`; \
-	  if [ ! -f $$f ]; then echo "  skip   $$b (no repo alongside)"; \
+	  if [ ! -f $$f ]; then echo "  skip   $$b (no iCE40 checkout at $(ICEBREAKER))"; \
 	  elif diff -q $$f rtl/$$b >/dev/null 2>&1; then echo "  match  $$b"; \
 	  else echo "  DRIFT  $$b"; diff -u $$f rtl/$$b | sed -n '1,40p'; ok=0; fi; \
 	done; [ $$ok = 1 ] || { echo; echo "rtl/ has diverged from the iCE40 sources."; exit 1; }
