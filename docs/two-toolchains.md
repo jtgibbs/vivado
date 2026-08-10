@@ -15,6 +15,7 @@ measurements rather than assertions.
 | Evidence | Hardware event counters | Static analysis + SDF-annotated simulation |
 | Metastability | **Real** — the only place it exists | **Absent** — not modelled anywhere |
 | CDC checking | **None** — no lint, no warning | `report_cdc`, structural, netlist-walking |
+| Clock-pair coverage | **None** — crossings excluded silently | `report_clock_interaction`, says what it skipped |
 | Cost / iteration | Free, ~1 s | $0.179/hr; 36 s synth+impl, 14 min timing sim |
 
 The design under test is one 24-bit counter in an asynchronous clock domain, read
@@ -398,6 +399,57 @@ vendor-specific. Both flows are Makefile-driven, both emit VCD, and Icarus is us
 in *both* — it runs a one-second laptop smoke test of the Artix-7 project before
 anything touches EC2.
 
+### What the open flow says about the same crossings
+
+Worth running rather than assuming. Same design, same 121 endpoints:
+
+```
+$ nextpnr-ice40 --up5k ...
+Info: Max frequency for clock                'clk_hf': 67.42 MHz (PASS at 48.00 MHz)
+Info: Max frequency for clock 'CLK$SB_IO_IN_$glb_clk': 19.07 MHz (PASS at 12.00 MHz)
+Info: Max delay <async>  -> posedge CLK$SB_IO_IN_$glb_clk: 2.59 ns
+
+$ icetime -d up5k -mtr ...
+Warning: timing analysis not supported for cell type HFOSC
+// Timing estimate: 53.25 ns (18.78 MHz)
+```
+
+**nextpnr does real per-clock STA.** It identifies both domains and passes both.
+That is more than the open flow usually gets credit for. `icetime` is the weak
+one — it collapses to a single number and warns outright that it cannot model the
+async oscillator at all. (Fmax figures move a little run to run with the placement
+seed; these are estimates, not signed-off numbers.)
+
+But look at what is *absent*. The `<async>` in that third line is the **RX input
+pin**, not `clk_hf`. The `clk_hf → CLK` crossings — the 121 endpoints Vivado
+enumerates by name — appear nowhere in the open flow's output. Not timed, not
+ignored, not waived. Silence. nextpnr treats unrelated clock domains as unrelated
+by default and never mentions having done so.
+
+> **Both flows exclude the crossings from timing analysis. Only one of them says so.**
+
+nextpnr: two clocks, both PASS, crossings unmentioned. Vivado: two clocks, both
+Clean, plus an explicit line reading *122 endpoints, Ignored, Asynchronous Groups*
+— and then 72 Critical findings from a separate structural engine.
+
+Which means the vendor flow adds **two** things here, not one:
+
+| Report | Answers | Open flow equivalent |
+|---|---|---|
+| `report_timing_summary` | Did the analyzed paths meet timing? | nextpnr per-clock Fmax |
+| `report_clock_interaction` | *Which paths did I analyze, and which did I skip?* | **none** |
+| `report_cdc` | Which crossings exist structurally, regardless of timing? | **none** |
+
+The missing CDC checker is a *known* absence — you know you do not have it. The
+missing coverage report is the more insidious one, because silent non-analysis
+looks exactly like success. A green nextpnr run and a green Vivado timing summary
+describe the same silicon; only one of them hands you the sentence naming what it
+declined to look at.
+
+The open flow also has no constraint language, so there is no way to *express* the
+intent even if you wanted to — no `set_clock_groups`, no exceptions, and nothing
+for `report_exceptions -ignored` to audit.
+
 **What the open flow does better**
 
 - **It has a board.** Metastability exists nowhere else. Vivado models setup/hold
@@ -413,8 +465,8 @@ anything touches EC2.
 - **`report_cdc`.** Structural, netlist-walking CDC detection. The open flow built
   an unsynchronized crossing *silently* — no lint, no warning, nothing.
 - **`report_clock_interaction`.** Classifies every clock pair as Timed / Ignored /
-  Partially constrained. This is what makes the "clean but ignored" contrast
-  visible at all.
+  Partially constrained. This is what makes the "clean but ignored" contrast visible
+  at all — and per the output above, the open flow has no equivalent.
 - **A real exception language.** `set_max_delay -datapath_only`, `set_bus_skew`,
   `set_clock_groups`, `ASYNC_REG`. `icetime` has none of it. Note the distinction
   that matters: max_delay bounds each bit, `set_bus_skew` bounds the *spread* — a
