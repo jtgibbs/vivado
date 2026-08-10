@@ -30,22 +30,42 @@ file mkdir $cdcdir
 # ─────────────────────────────────────────────────────────────────────────────
 report_cdc -details -file $cdcdir/cdc_details.rpt
 report_cdc           -file $cdcdir/cdc_summary.rpt
-set cdc_txt [report_cdc -return_string]
 
-# Tally by severity. Rule numbers move between Vivado releases, so key off the
-# severity column rather than hard-coding CDC-1 / CDC-4 / CDC-13.
+# -details is REQUIRED here, and this is not a stylistic preference. Plain
+# `report_cdc -return_string` emits the per-clock-pair summary, whose rows start
+# with the severity and contain no CDC-nn rule ID at all. Parsing that for rule
+# IDs silently yields zero rows — which on the first real run of this project
+# produced a confident "zero Critical findings" on a report that in fact listed
+# 72 of them. Only -details carries the `ID Severity Count Description` table.
+set cdc_txt [report_cdc -details -return_string]
+
+# Tally by severity, summing the Count column. Rule numbers move between Vivado
+# releases, so the severity is what the pass/fail gate keys off; the IDs are kept
+# only to print alongside.
 array set sev {Critical 0 Warning 0 Info 0}
 array set rule {}
+set rows 0
 foreach line [split $cdc_txt "\n"] {
-    if {[regexp {(CDC-\d+)\s+(Critical|Warning|Info)} $line -> r s]} {
-        incr sev($s)
-        if {![info exists rule($r)]} { set rule($r) [string trim $line] }
+    if {[regexp {^\s*(CDC-\d+)\s+(Critical|Warning|Info)\s+(\d+)\s+(.*?)\s*$} $line -> r s n d]} {
+        incr sev($s) $n
+        set rule($r) [format "%-7s %-8s %5d  %s" $r $s $n $d]
+        incr rows
     }
 }
 
 puts ""
-puts "CDC severity tally:  Critical=$sev(Critical)  Warning=$sev(Warning)  Info=$sev(Info)"
-foreach r [lsort [array names rule]] { puts "  $rule($r)" }
+if {$rows == 0} {
+    # Distinguish "the tool found nothing" from "we failed to read what it
+    # found". Conflating those is how a broken parser masquerades as a clean
+    # design — the exact failure this script exists to prevent elsewhere.
+    puts "PARSE FAILURE: report_cdc returned [string length $cdc_txt] characters but no"
+    puts "  'CDC-nn Severity Count' rows matched. The report format has changed;"
+    puts "  the gate below cannot be trusted. First 30 lines as seen:"
+    foreach l [lrange [split $cdc_txt "\n"] 0 29] { puts "  | $l" }
+} else {
+    puts "CDC severity tally:  Critical=$sev(Critical)  Warning=$sev(Warning)  Info=$sev(Info)"
+    foreach r [lsort [array names rule]] { puts "  $rule($r)" }
+}
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 2. Clock interaction — the other half of the picture
@@ -98,22 +118,35 @@ if {[catch {
 # netlist got optimized in a way that removed the paths — either way the run is
 # not trustworthy and should fail loudly rather than produce a clean report.
 set ok 1
-if {$sev(Critical) == 0} {
+if {$rows == 0} {
     puts ""
-    puts "AUDIT FAILED: zero Critical CDC findings on a design containing three"
-    puts "  deliberately broken crossings. Either the DONT_TOUCH properties in"
-    puts "  run.tcl did not stick and the naive paths were optimized away, or"
-    puts "  this Vivado version classifies them below Critical. Read"
-    puts "  $cdcdir/cdc_details.rpt before trusting any other report here."
+    puts "AUDIT INVALID: could not parse the CDC report (see PARSE FAILURE above)."
+    puts "  This is NOT a statement about the design. Fix the parser first."
     set ok 0
-}
-if {$sev(Info) == 0} {
-    puts ""
-    puts "AUDIT WARNING: zero Info findings. The gray+2FF and handshake"
-    puts "  synchronizers should be recognised and reported as safe. If they are"
-    puts "  not being seen, ASYNC_REG probably failed to apply — check the cell"
-    puts "  name patterns in cdc_corruption_a7.xdc against this netlist."
-    set ok 0
+} else {
+    if {$sev(Critical) == 0} {
+        puts ""
+        puts "AUDIT FAILED: zero Critical CDC findings on a design containing three"
+        puts "  deliberately broken crossings. Check, in this order:"
+        puts "    1. do clk_async and sys_clk BOTH exist? A skipped create_clock"
+        puts "       leaves one clock and therefore no crossings at all. Grep the"
+        puts "       Vivado log for 'not supported in the xdc constraint file' —"
+        puts "       XDC is a restricted command set, not Tcl, and a rejected"
+        puts "       block is only a CRITICAL WARNING, not an error."
+        puts "    2. did DONT_TOUCH stick? If the naive paths were optimized away"
+        puts "       there is nothing left to flag."
+        puts "  Read $cdcdir/cdc_details.rpt before trusting any other report here."
+        set ok 0
+    }
+    if {$sev(Info) == 0 && $sev(Warning) == 0} {
+        puts ""
+        puts "AUDIT WARNING: nothing reported as safely synchronized. The gray+2FF"
+        puts "  and handshake paths should appear (CDC-3 / CDC-6, 'synchronized"
+        puts "  with ASYNC_REG property'). If they do not, ASYNC_REG failed to"
+        puts "  apply — check the cell-name patterns in run.tcl's"
+        puts "  apply_cdc_constraints against this netlist."
+        set ok 0
+    }
 }
 
 puts ""

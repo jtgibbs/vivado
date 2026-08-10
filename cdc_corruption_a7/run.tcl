@@ -129,9 +129,73 @@ proc stage_synth {} {
         }
     }
 
+    apply_cdc_constraints
+
     write_checkpoint -force $OUT/post_synth.dcp
     report_utilization -file $OUT/utilization_synth.rpt
     puts "checkpoint: $OUT/post_synth.dcp"
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# The cell-scoped CDC constraints for the two SAFE crossings.
+#
+# These are here rather than in the .xdc because Vivado's XDC reader is a
+# RESTRICTED command set, not Tcl: `if` is rejected with
+# "[Designutils 20-1307] Command 'if' is not supported in the xdc constraint
+# file" — and it is a CRITICAL WARNING, so the block is skipped and the run
+# carries on looking fine. That is precisely how the first real run of this
+# project failed: the conditional creating clk_async never executed, the design
+# had a single clock, and report_cdc honestly found zero crossings in a design
+# made of crossings.
+#
+# Selecting cells by name pattern *requires* a guard, because a pattern that
+# matches nothing must be loud. Silently constraining zero cells is the worst
+# failure mode a constraints file has — every report downstream reads as clean.
+# So this runs where guards are legal, right after synth_design and before the
+# CDC audit, and it reports what each pattern actually matched.
+proc apply_cdc_constraints {} {
+    puts "  -- CDC constraints (cell-scoped) --"
+
+    # ASYNC_REG: keeps each synchronizer pair in one slice, maximising settling
+    # time for stage 2, and is what makes report_synchronizer_mtbf see them.
+    set async_reg [get_cells -quiet -hier -regexp \
+        {.*(gray_meta|gray_sync|req_meta|req_sync|ack_meta|ack_sync)_reg(\[\d+\])?}]
+    if {[llength $async_reg]} {
+        set_property ASYNC_REG TRUE $async_reg
+        puts "  ASYNC_REG on [llength $async_reg] cell(s)"
+    } else {
+        puts "  WARNING: ASYNC_REG matched NOTHING — synchronizers will be"
+        puts "           misreported as unsynchronized crossings"
+    }
+
+    # Handshake bus: stamp_q (clk_async) -> data (sys_clk). The four-phase
+    # handshake freezes stamp_q for several cycles before it crosses, so this
+    # needs no setup/hold relationship — only a bound so the router cannot
+    # stretch it past what the handshake actually allows.
+    bound_bus "handshake stamp_q->data" \
+        {.*u_hs/stamp_q_reg(\[\d+\])?} {.*u_hs/data_reg(\[\d+\])?} 10.000 10.000
+
+    # Gray bus: hf_gray (clk_async) -> gray_meta (sys_clk). One bit changes per
+    # step, so a bit caught mid-transition resolves to old or new and both are
+    # legal — but only while bus skew stays under one source period. Past that,
+    # two bits can appear to change at once and the gray property is gone.
+    bound_bus "gray hf_gray->gray_meta" \
+        {.*hf_gray_reg(\[\d+\])?} {.*gray_meta_reg(\[\d+\])?} 10.000 14.000
+}
+
+# max_delay bounds each bit; set_bus_skew bounds the SPREAD across them. A
+# multi-bit crossing can meet max_delay on every bit and still tear, so the skew
+# bound is the one doing the real work.
+proc bound_bus {label from_re to_re maxdly skew} {
+    set from [get_cells -quiet -hier -regexp $from_re]
+    set to   [get_cells -quiet -hier -regexp $to_re]
+    if {![llength $from] || ![llength $to]} {
+        puts "  WARNING: $label — matched [llength $from] launch / [llength $to] latch cells; NOT constrained"
+        return
+    }
+    set_max_delay -datapath_only -from $from -to $to $maxdly
+    set_bus_skew -from $from -to $to $skew
+    puts "  $label: max_delay ${maxdly}ns, bus_skew ${skew}ns over [llength $from]->[llength $to] cells"
 }
 
 # ─────────────────────────────────────────────────────────────────────────────

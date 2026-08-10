@@ -36,28 +36,39 @@ set_property CONFIG_VOLTAGE 3.3 [current_design]
 # ─────────────────────────────────────────────────────────────────────────────
 create_clock -name sys_clk -period 10.000 [get_ports CLK100MHZ]
 
-# The asynchronous domain. Only one of these two exists in any given build.
-if {[llength [get_ports -quiet ck_ja0]] && \
-    [llength [get_nets -quiet -of [get_ports ck_ja0]]]} {
-    # 65 MHz nominal, matching the internal ring oscillator this stands in for.
-    # Constrain it FASTER than the testbench drives it: the async domain's own
-    # internal timing must close with margin, or a failure inside that domain
-    # would masquerade as a CDC failure and the whole measurement is worthless.
-    create_clock -name clk_async -period 14.000 [get_ports ck_ja0]
+# ── NOTE: XDC IS NOT TCL ──────────────────────────────────────────────────────
+# Vivado reads .xdc with a *restricted* command set. `if`, `foreach` and friends
+# are rejected with "[Designutils 20-1307] Command 'if' is not supported in the
+# xdc constraint file" — a CRITICAL WARNING, not an error, so the block is
+# silently skipped and the run continues looking healthy.
+#
+# That is exactly how this file failed the first time it met a real Vivado: the
+# conditional that created clk_async never executed, the design had one clock,
+# and report_cdc truthfully reported zero crossings on a design built entirely
+# out of crossings. The known-answer check caught it; a "looks clean" reading
+# would not have.
+#
+# So: this file is now strictly declarative. Anything needing control flow lives
+# in run.tcl, which is full Tcl.
+# ──────────────────────────────────────────────────────────────────────────────
 
-    # ck_ja0 is a general-purpose I/O, not a clock-capable pin, so it cannot
-    # reach a BUFG on the dedicated clock route. This waiver is safe HERE and
-    # only here: the async domain is a free-running counter whose absolute skew
-    # to anything else is irrelevant by definition. Do not copy this line into a
-    # design where the clock's insertion delay matters.
-    set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets -of [get_ports ck_ja0]]
-}
-set cfgmclk [get_pins -quiet g_startup.u_startup/CFGMCLK]
-if {[llength $cfgmclk]} {
-    # STARTUPE2 CFGMCLK is an untrimmed ring oscillator: ~65 MHz nominal with a
-    # very wide process/voltage/temperature spread. Constrain the fast corner.
-    create_clock -name clk_async -period 10.000 $cfgmclk
-}
+# The asynchronous domain (ASYNC_SRC = "EXT", the default — testbench-driven).
+# 65 MHz nominal, matching the internal ring oscillator this stands in for.
+# Constrain it FASTER than the testbench drives it: the async domain's own
+# internal timing must close with margin, or a failure inside that domain would
+# masquerade as a CDC failure and the whole measurement is worthless.
+create_clock -name clk_async -period 14.000 [get_ports ck_ja0]
+
+# ck_ja0 is a general-purpose I/O, not a clock-capable pin, so it cannot reach a
+# BUFG on the dedicated clock route. This waiver is safe HERE and only here: the
+# async domain is a free-running counter whose absolute skew to anything else is
+# irrelevant by definition. Do not copy this line into a design where the clock's
+# insertion delay matters.
+set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets -of [get_ports ck_ja0]]
+
+# For an ASYNC_SRC = "STARTUP" build, clk_async comes off STARTUPE2/CFGMCLK
+# instead and this file is wrong for it. That variant needs its own constraints
+# file rather than a conditional here — see run.tcl.
 
 # sys_clk and clk_async share no source and have no phase relationship. Without
 # this, Vivado times every crossing between them against a meaningless
@@ -75,45 +86,26 @@ set_clock_groups -asynchronous \
 # ─────────────────────────────────────────────────────────────────────────────
 # CDC — the SAFE crossings, constrained on purpose
 # ─────────────────────────────────────────────────────────────────────────────
-
-# ASYNC_REG on every first- and second-stage synchronizer flop. Two effects,
-# both required: the placer keeps the pair in the same slice (maximising the
-# settling time available to stage 2), and Vivado stops flagging them as
-# unsynchronized crossings — and starts including them in
-# report_synchronizer_mtbf.
-set async_reg_cells [get_cells -quiet -hier -regexp \
-    {.*(gray_meta|gray_sync|req_meta|req_sync|ack_meta|ack_sync)_reg(\[\d+\])?}]
-if {[llength $async_reg_cells]} {
-    set_property ASYNC_REG TRUE $async_reg_cells
-}
-
-# Handshake data bus: stamp_q (clk_async) -> data (sys_clk). The four-phase
-# handshake guarantees stamp_q is frozen for several cycles before sys_clk
-# samples it, so this path needs no setup/hold relationship — only a bound so
-# the router cannot stretch it past the time the handshake actually allows.
-# -datapath_only removes the source clock's uncertainty from the calculation;
-# the number is one destination period.
-set hs_launch [get_cells -quiet -hier -regexp {.*u_hs/stamp_q_reg(\[\d+\])?}]
-set hs_latch  [get_cells -quiet -hier -regexp {.*u_hs/data_reg(\[\d+\])?}]
-if {[llength $hs_launch] && [llength $hs_latch]} {
-    set_max_delay -datapath_only -from $hs_launch -to $hs_latch 10.000
-    # Bus skew is the constraint that actually matters for a multi-bit crossing:
-    # max delay bounds each bit, set_bus_skew bounds the SPREAD between them.
-    # A design can meet max_delay on all 24 bits and still tear.
-    set_bus_skew -from $hs_launch -to $hs_latch 10.000
-}
-
-# Gray-coded bus: hf_gray (clk_async) -> gray_meta (sys_clk). Only one bit
-# changes per step, so a bit caught mid-transition resolves to either the old or
-# the new value and both are legal — but only if the skew across the bus is
-# under one source period, or two bits can appear to change at once and the
-# gray property is lost.
-set gray_launch [get_cells -quiet -hier -regexp {.*hf_gray_reg(\[\d+\])?}]
-set gray_latch  [get_cells -quiet -hier -regexp {.*gray_meta_reg(\[\d+\])?}]
-if {[llength $gray_launch] && [llength $gray_latch]} {
-    set_max_delay -datapath_only -from $gray_launch -to $gray_latch 10.000
-    set_bus_skew  -from $gray_launch -to $gray_latch 14.000
-}
+#
+# These live in run.tcl (`apply_cdc_constraints`), not here, and the reason is
+# the restricted-command-set note above. They select cells by name pattern, and
+# a pattern that matches nothing has to be caught and reported — which needs
+# `if`, which this file cannot have. Silently constraining nothing is the single
+# most dangerous failure mode in a constraints file: everything downstream reads
+# as clean.
+#
+# What is applied there, immediately after synth_design and before the CDC audit:
+#
+#   ASYNC_REG TRUE      on gray_meta/gray_sync/req_meta/req_sync/ack_meta/
+#                       ack_sync. Keeps each synchronizer pair in one slice, and
+#                       is what makes report_synchronizer_mtbf see them at all.
+#   set_max_delay -datapath_only  and  set_bus_skew   on the two safe buses:
+#                       u_hs/stamp_q -> u_hs/data (handshake, frozen before it
+#                       crosses) and hf_gray -> gray_meta (one bit changes per
+#                       step). max_delay bounds each bit; set_bus_skew bounds the
+#                       SPREAD between them — a design can meet max_delay on all
+#                       24 bits and still tear, so the skew bound is the one that
+#                       actually protects the crossing.
 
 # ─────────────────────────────────────────────────────────────────────────────
 # CDC — the BROKEN crossings, left unconstrained on purpose
