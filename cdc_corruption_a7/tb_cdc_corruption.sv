@@ -64,6 +64,27 @@ module tb_cdc_corruption;
     // Mode 3 does use a hierarchical reference and is therefore behavioral-only;
     // it is compiled out unless HIER_OK is defined.
     parameter integer TRIG_MODE     = 0;
+    // Extra settle before the tear trigger arms. Default 0 — arming happens at
+    // rx_enable, already 900 ns after GSR releases — and that default is the
+    // result of getting this wrong twice, in opposite directions.
+    //
+    // led[3:1] are STICKY: they latch "this counter is non-zero" and never
+    // clear. So `wait (led != 0)` does not mean "first tear", it means "any tear
+    // ever, including during reset". In post-implementation timing simulation
+    // gray_naked always scores one during GSR — it decodes the raw async bus
+    // combinationally and registers it once, so as the flops leave global reset
+    // it samples garbage and the detector sees an enormous step. First attempt
+    // therefore triggered at exactly t=1000 ns on a reset artifact.
+    //
+    // The fix that overshot: wait 3 us, then arm. By 3 us ALL THREE counters are
+    // dirty — tears here run about 1/us — so the mask covered everything and the
+    // trigger could never fire. That masked the real events, not the artifact.
+    //
+    // What actually works: arm immediately, snapshot which bits are already set
+    // (gray_naked, from GSR), and fire on the first bit to go dirty AFTER that —
+    // naive_direct or naive_2ff, which are the interesting ones anyway. Raise
+    // this only if a future netlist shows genuine post-GSR settling.
+    parameter real    TRIG_ARM_NS   = 0.0;
     parameter [23:0]  TRIG_COUNT    = 24'h000000;  // mode 3 target
     parameter real    TRIG_STOP_NS  = 0.0;   // >0: $finish this long after trigger
     // A VCD cannot rewind, so a single run cannot decide to start dumping after
@@ -202,17 +223,28 @@ module tb_cdc_corruption;
 
     // ── Trigger ──────────────────────────────────────────────────────────────
     real trig_ns = -1.0;
+    reg [2:0] arm_mask = 3'b000;   // tear bits already dirty when we armed
 
     initial begin
         @(posedge rx_enable);          // ignore anything before GSR releases
         case (TRIG_MODE)
             1: begin
-                wait (led[3:1] != 3'b000);
+                if (TRIG_ARM_NS > 0.0) #(TRIG_ARM_NS);
+                arm_mask = led[3:1];
+                if (arm_mask != 3'b000) begin
+                    $display("");
+                    $display("NOTE: led[3:1] = %b already set at arm (%0.0f ns) — startup",
+                             arm_mask, $realtime);
+                    $display("      artifact, not a CDC event. Those bits are excluded;");
+                    $display("      trigger will fire on a counter that goes dirty later.");
+                end
+                wait ((led[3:1] & ~arm_mask) != 3'b000);
                 trig_ns = $realtime;
                 $display("");
                 $display("TRIGGER  first tear at %0.3f ns", trig_ns);
                 $display("         led[3:1] = %b  (gray_naked, naive_2ff, naive_direct)",
                          led[3:1]);
+                $display("         newly set = %b", led[3:1] & ~arm_mask);
                 report_paths;
             end
             2: begin

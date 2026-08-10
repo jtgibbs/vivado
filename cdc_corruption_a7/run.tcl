@@ -229,10 +229,17 @@ proc stage_impl {} {
     report_utilization     -file $OUT/utilization_impl.rpt
     report_clock_utilization -file $OUT/clock_utilization.rpt
 
-    # The two artifacts the timing simulation needs. -sdf_anno false: the SDF is
-    # attached by xelab -sdfmax instead of by an embedded $sdf_annotate, which
-    # keeps the netlist reusable and makes the annotation visible in the log.
-    write_verilog -force -mode timesim -sdf_anno false $OUT/${TOP}_timesim.v
+    # -sdf_anno true embeds $sdf_annotate in the netlist itself. The alternative
+    # -- -sdf_anno false plus xelab -sdfmax -- looks cleaner and DOES NOT WORK
+    # here: post-route instance names contain brackets (hf_count[0]_i_1,
+    # CLK100MHZ_IBUF_BUFG_inst), which become escaped Verilog identifiers, and
+    # -sdfmax path matching fails on them. It fails per-instance with
+    # "[XSIM 43-3477] ... annotation will be skipped" while still reporting
+    # "[XSIM 43-3452] SDF backannotation was successful" for the file overall --
+    # so the run looks annotated and is not. 1486 of 1487 instances were silently
+    # skipped that way, which made a "post-implementation timing simulation" into
+    # a zero-delay gate simulation wearing its costume.
+    write_verilog -force -mode timesim -sdf_anno true $OUT/${TOP}_timesim.v
     write_sdf     -force -process_corner slow          $OUT/${TOP}_timesim.sdf
 
     # Worth a look even though set_clock_groups made the async paths unreported:
@@ -265,7 +272,6 @@ proc stage_timing {} {
     # as glitches. Those glitches are the evidence. Let them through.
     run xelab -L simprims_ver -L unisims_ver -debug typical --timescale 1ns/1ps \
         -transport_int_delays -pulse_r 0 -pulse_int_r 0 \
-        -sdfmax /tb_cdc_corruption/dut=[file join $OUT ${TOP}_timesim.sdf] \
         -generic_top "CLKS_PER_BIT=$SIM_CPB" \
         -generic_top "OBS_US=$OBS_US_TIMING" \
         tb_cdc_corruption glbl -s tb_timing -log xelab_timing.log
@@ -325,7 +331,6 @@ proc stage_trap {} {
     puts "pass 1: locating the first tear (no waveform)"
     run xelab -L simprims_ver -L unisims_ver --timescale 1ns/1ps \
         -transport_int_delays -pulse_r 0 -pulse_int_r 0 \
-        -sdfmax /tb_cdc_corruption/dut=$sdf \
         -generic_top "CLKS_PER_BIT=$SIM_CPB" \
         -generic_top "OBS_US=$OBS_US_TIMING" \
         -generic_top "TRIG_MODE=1" \
@@ -352,7 +357,6 @@ proc stage_trap {} {
     puts "pass 2: first tear at $t ns — dumping \[$lo, $hi\] ns only"
     run xelab -L simprims_ver -L unisims_ver -debug typical --timescale 1ns/1ps \
         -transport_int_delays -pulse_r 0 -pulse_int_r 0 \
-        -sdfmax /tb_cdc_corruption/dut=$sdf \
         -generic_top "CLKS_PER_BIT=$SIM_CPB" \
         -generic_top "OBS_US=$OBS_US_TIMING" \
         -generic_top "TRIG_MODE=1" \

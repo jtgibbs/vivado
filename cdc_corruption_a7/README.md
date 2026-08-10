@@ -346,6 +346,103 @@ a green timing summary is not evidence of a safe design.
 Target is the Arty A7-35T (`xc7a35ticsg324-1L`); the part and the pin section of
 the XDC are the only board-specific lines.
 
+## Measured — Vivado 2025.2 on EC2, xc7a35ticsg324-1L
+
+First real run of the vendor flow, 2026-08-10.
+
+### CDC audit — known-answer check PASS
+
+```
+CDC severity tally:  Critical=72  Warning=25  Info=2
+
+CDC-1   Critical  24  1-bit unknown CDC circuitry             <- gray, NO synchronizer
+CDC-11  Critical  48  Fan-out from launch flop to dest clock  <- naive direct + naive 2FF
+CDC-15  Warning   24  Clock enable controlled CDC structure
+CDC-6   Warning    1  Multi-bit synchronized with ASYNC_REG   <- gray + 2FF   (correct)
+CDC-3   Info       2  1-bit synchronized with ASYNC_REG       <- handshake    (correct)
+```
+
+Three planted bugs flagged Critical; both correct references recognised as
+synchronized. The tool is calibrated.
+
+### The contrast that is the whole point
+
+`clock_interaction.rpt`, post-route, same run:
+
+```
+clk_async -> sys_clk     121 endpoints   Ignored   Asynchronous Groups
+sys_clk   -> clk_async     1 endpoint    Ignored   Asynchronous Groups
+sys_clk   -> sys_clk      WNS 1.610      Clean     Timed
+clk_async -> clk_async    WNS 10.081     Clean     Timed
+```
+
+**Every timed clock pair is Clean. 122 endpoints are Ignored. `report_cdc`
+returns 72 Critical findings on those same ignored paths.** The timing summary is
+not lying — it is answering a different question, because `set_clock_groups
+-asynchronous` excused those paths from analysis and excusing them changed
+nothing about the silicon. Put the two reports side by side and the case makes
+itself.
+
+### Post-implementation timing simulation
+
+47,798 `$setuphold` violations from the SIMPRIM `FDRE` models, distributed
+exactly as the theory predicts:
+
+| capture flop | violations | |
+|---|---|---|
+| `u_c/nd_r_reg` | 17,170 | naive direct — stage 1, result used directly |
+| `u_c/n2_meta_reg` | 15,597 | naive 2FF — stage 1 |
+| `u_c/gray_meta_reg` | 8,442 | gray + 2FF — stage 1 |
+| `u_c/gray_naked_reg` | 6,589 | gray, no synchronizer |
+| `u_c/gray_sync_reg` | **0** | gray + 2FF — **stage 2** |
+| `u_hs/stamp_q_reg`, `u_hs/data_reg` | **0** | handshake |
+
+Violations on stage 1 of the *correct* gray path are not a defect — absorbing
+metastability is precisely what stage 1 exists to do. The discriminator is stage
+2: it is clean, and so is the handshake. The naive paths have no stage 2.
+
+**Known limitation:** under full SDF annotation the UART readout does not
+complete — X from the violations propagates and the register read hangs, so
+there is no tear-count table from this run. That is the simulator declining to
+guess, which is the honest answer, but it means the *rate* has to come from
+hardware. Run wall time was 14 minutes for 30 us simulated.
+
+### Implementation
+
+WNS **+1.470 ns**, 36 seconds wall, peak memory **2982 MB** — against AMD's
+published 3 GB figure for this part. The sizing in [SETUP.md](../SETUP.md) held
+exactly; the widely repeated "8 GB for Artix-7" would have been 2.7x oversized.
+
+### Four ways this flow lied before it told the truth
+
+Every one of these produced a run that looked healthy:
+
+1. **XDC is not Tcl.** `if` is rejected as a CRITICAL WARNING, not an error, so
+   the block is skipped and the run continues. The conditional creating
+   `clk_async` never executed; the design synthesized with one clock and
+   `report_cdc` truthfully found zero crossings in a design made of crossings.
+2. **`report_cdc -return_string` needs `-details`.** Without it you get the
+   per-clock-pair summary, which carries no `CDC-nn` rule ID, so ID-based parsing
+   matches nothing. The gate reported "zero Critical findings" against a report
+   listing 72.
+3. **`-sdfmax` cannot match escaped instance names.** Post-route names contain
+   brackets (`hf_count[0]_i_1`), and XSim skipped 1486 of 1487 instances one
+   `[XSIM 43-3477]` warning at a time — while still printing `[XSIM 43-3452] SDF
+   backannotation was successful` for the file. A "timing simulation" with no
+   timing. `write_verilog -sdf_anno true` fixes it: skips went 1486 -> 0.
+4. **Sticky trigger bits.** `led[3:1]` latch "counter non-zero" and never clear,
+   so "first tear" meant "any tear ever, including during GSR" — and `gray_naked`
+   always scores one at reset. The trap fired on a reset artifact at exactly
+   t=1000 ns. Arming late overcorrected and masked the real events. The working
+   form snapshots what is already dirty and fires on the first bit to go dirty
+   *after* that: genuine first tear at **1014.143 ns** on `naive_direct`.
+
+Numbers 2 and 3 are the instructive ones. Both were tools reporting **success at
+one level while failing completely at another**, and both would have produced a
+confident, wrong writeup. This is the argument for known-answer testing stated as
+plainly as it can be: the only reason any of these were caught is that the
+expected answer was known in advance and the check refused to pass without it.
+
 ## Status
 
 **Verified locally as far as it can be.** `make smoke` passes: the design
@@ -356,8 +453,8 @@ trigger, first tear caught at 2345 ns, 400 ns window dumped at 27 KB instead of
 5.7 MB. The trigger and windowing mechanism the Vivado `trap` stage depends on
 is therefore proven; only the `run.tcl` wrapper around it is unrun.
 
-**Not yet run under Vivado.** There is no Vivado on the Mac, so `synth`, `impl`,
-`cdc` and `timing` are unexecuted. [SETUP.md](../SETUP.md) has the instance sizing,
+**Run under Vivado 2025.2 on EC2, 2026-08-10** — see Measured above. `synth`,
+`cdc`, `impl`, `timing` and `trap` have all executed against real silicon models. [SETUP.md](../SETUP.md) has the instance sizing,
 install, cost and first-run sequence. Expect first-contact friction in two specific
 places, both commented where they will bite:
 
