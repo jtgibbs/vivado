@@ -91,6 +91,26 @@ than sampling from the host is the entire reason the number means anything.
 | naive per-bit 2FF | *Every bit* through a 2-flop synchronizer | 46,078 | **tears** |
 | gray, no sync | Gray decoded from the raw async bus | 113,893 | **worse** |
 
+### Not five variants — three controlled experiments
+
+The five paths share one counter on purpose. Read pairwise they isolate one
+variable at a time, each with its own control:
+
+| Compare | Isolates | Result |
+|---|---|---|
+| `naive_direct` vs `naive_2ff` | metastability | 46,078 vs 46,078 — **no effect** |
+| `naive_2ff` vs `gray + 2FF` | the encoding | 46,078 vs 0 — **decisive** |
+| `gray + 2FF` vs `gray, no sync` | where the decode sits | 0 vs 113,893 — **decisive** |
+
+Rows one and two use the **same two-flop synchronizer** and land on opposite
+outcomes. That is what pins the cause on coherence rather than metastability — the
+flops are held constant and only the encoding changes. Row three holds the encoding
+constant and moves only the decode.
+
+All crossing buses leave the 48 MHz domain **registered** — `hf_count` for the naive
+paths and the handshake, `hf_gray` for both gray paths — so no comparison is
+confounded by an unregistered launch.
+
 Two results worth internalising.
 
 **Per-bit two-flop synchronization is exactly as broken as naive** — identical
@@ -108,6 +128,23 @@ sampling the bus mid-transition yields old-or-new, either of which is legal — 
 that path decodes *combinationally before* capturing. The XOR cascade converts a
 single-bit gray transition into a **multi-bit** binary transition whose bits reach
 the capture register at different times, which throws the guarantee away.
+
+The spread is **structural, not incidental**. `bin[23]` is a bare wire; `bin[0]` is
+the XOR of all 24 gray bits. Logic depth is graded across the decoded bus by
+construction, so the bits arrive systematically staggered. The naive paths are 24
+identically-shaped single-flop captures with roughly matched delays — which is why
+the decoded path is *worse*, and why that needs no appeal to metastability.
+
+The decoder itself has no clock: it is driven by the 48 MHz domain and sampled by
+the 12 MHz one, sitting inside the crossing. To STA it is a single async path with
+a cloud of XOR in the middle — launch `hf_gray`, capture `gray_naked`, and
+`set_clock_groups` excused the whole thing from analysis.
+
+The working path is the same bus with the decode moved to the far side of the
+synchronizer: `hf_gray` → `gray_meta` → `gray_sync` → decode. Two flops let the one
+in-flight bit resolve, after which the word is a valid gray code and decoding is
+safe. **The gray property belongs to the encoded bus and does not survive decoding**
+— so synchronize, then decode, never the reverse.
 Metastability may contribute too, since nothing resolves a marginal capture here,
 but the coherence argument alone accounts for the failure and a tear counter cannot
 apportion the two. Gray fixes coherence; flops fix metastability. Orthogonal, and
