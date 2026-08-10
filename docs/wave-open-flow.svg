@@ -1,0 +1,92 @@
+<svg viewBox="0 0 1240 264" xmlns="http://www.w3.org/2000/svg" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" role="img" aria-label="waveform"><title>Open flow: torn read at 2335 ns under Icarus with injected bus skew</title><rect x="0" y="0" width="1240" height="264" fill="#FFFFFF"/>
+<line x1="158.0" y1="10" x2="158.0" y2="244" stroke="#D8D6CE" stroke-width="0.5"/>
+<text x="158.0" y="258" fill="#7C818B" text-anchor="middle">2295</text>
+<line x1="264.8" y1="10" x2="264.8" y2="244" stroke="#D8D6CE" stroke-width="0.5"/>
+<text x="264.8" y="258" fill="#7C818B" text-anchor="middle">2304</text>
+<line x1="371.6" y1="10" x2="371.6" y2="244" stroke="#D8D6CE" stroke-width="0.5"/>
+<text x="371.6" y="258" fill="#7C818B" text-anchor="middle">2313</text>
+<line x1="478.4" y1="10" x2="478.4" y2="244" stroke="#D8D6CE" stroke-width="0.5"/>
+<text x="478.4" y="258" fill="#7C818B" text-anchor="middle">2322</text>
+<line x1="585.2" y1="10" x2="585.2" y2="244" stroke="#D8D6CE" stroke-width="0.5"/>
+<text x="585.2" y="258" fill="#7C818B" text-anchor="middle">2331</text>
+<line x1="692.0" y1="10" x2="692.0" y2="244" stroke="#D8D6CE" stroke-width="0.5"/>
+<text x="692.0" y="258" fill="#7C818B" text-anchor="middle">2340</text>
+<line x1="798.8" y1="10" x2="798.8" y2="244" stroke="#D8D6CE" stroke-width="0.5"/>
+<text x="798.8" y="258" fill="#7C818B" text-anchor="middle">2349</text>
+<line x1="905.6" y1="10" x2="905.6" y2="244" stroke="#D8D6CE" stroke-width="0.5"/>
+<text x="905.6" y="258" fill="#7C818B" text-anchor="middle">2358</text>
+<line x1="1012.4" y1="10" x2="1012.4" y2="244" stroke="#D8D6CE" stroke-width="0.5"/>
+<text x="1012.4" y="258" fill="#7C818B" text-anchor="middle">2367</text>
+<line x1="1119.2" y1="10" x2="1119.2" y2="244" stroke="#D8D6CE" stroke-width="0.5"/>
+<text x="1119.2" y="258" fill="#7C818B" text-anchor="middle">2376</text>
+<line x1="1226.0" y1="10" x2="1226.0" y2="244" stroke="#D8D6CE" stroke-width="0.5"/>
+<text x="1226.0" y="258" fill="#7C818B" text-anchor="middle">2385</text>
+<text x="1234" y="258" fill="#7C818B" text-anchor="end">ns</text>
+<text x="149" y="35" fill="#16181D" text-anchor="end">CLK 100 MHz</text>
+<path d="M 158.0 19.0 L 217.3 19.0 L 217.3 35.0 L 276.7 35.0 L 276.7 19.0 L 336.0 19.0 L 336.0 35.0 L 395.3 35.0 L 395.3 19.0 L 454.7 19.0 L 454.7 35.0 L 514.0 35.0 L 514.0 19.0 L 573.3 19.0 L 573.3 35.0 L 632.7 35.0 L 632.7 19.0 L 692.0 19.0 L 692.0 35.0 L 751.3 35.0 L 751.3 19.0 L 810.7 19.0 L 810.7 35.0 L 870.0 35.0 L 870.0 19.0 L 929.3 19.0 L 929.3 35.0 L 988.7 35.0 L 988.7 19.0 L 1048.0 19.0 L 1048.0 35.0 L 1107.3 35.0 L 1107.3 19.0 L 1166.7 19.0 L 1166.7 35.0 L 1226.0 35.0 L 1226.0 19.0 L 1226.0 19.0" fill="none" stroke="#1A5580" stroke-width="1.3"/>
+<text x="149" y="67" fill="#16181D" text-anchor="end">clk_async</text>
+<path d="M 158.0 51.0 L 219.0 51.0 L 219.0 67.0 L 315.2 67.0 L 315.2 51.0 L 411.5 51.0 L 411.5 67.0 L 507.8 67.0 L 507.8 51.0 L 604.2 51.0 L 604.2 67.0 L 700.7 67.0 L 700.7 51.0 L 797.1 51.0 L 797.1 67.0 L 893.7 67.0 L 893.7 51.0 L 990.3 51.0 L 990.3 67.0 L 1087.0 67.0 L 1087.0 51.0 L 1183.8 51.0 L 1183.8 67.0 L 1226.0 67.0" fill="none" stroke="#1A5580" stroke-width="1.3"/>
+<text x="149" y="99" fill="#16181D" text-anchor="end">hf_count  TRUTH</text>
+<path d="M 158.0 91.0 L 161.0 83.0 L 312.2 83.0 L 315.2 91.0 L 312.2 99.0 L 161.0 99.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="236.6" y="97.0" fill="#16181D" text-anchor="middle">00008e</text>
+<path d="M 315.2 91.0 L 318.2 83.0 L 504.8 83.0 L 507.8 91.0 L 504.8 99.0 L 318.2 99.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="411.5" y="97.0" fill="#16181D" text-anchor="middle">00008f</text>
+<path d="M 507.8 91.0 L 510.8 83.0 L 697.7 83.0 L 700.7 91.0 L 697.7 99.0 L 510.8 99.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="604.2" y="97.0" fill="#16181D" text-anchor="middle">000090</text>
+<path d="M 700.7 91.0 L 703.7 83.0 L 890.7 83.0 L 893.7 91.0 L 890.7 99.0 L 703.7 99.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="797.2" y="97.0" fill="#16181D" text-anchor="middle">000091</text>
+<path d="M 893.7 91.0 L 896.7 83.0 L 1084.0 83.0 L 1087.0 91.0 L 1084.0 99.0 L 896.7 99.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="990.4" y="97.0" fill="#16181D" text-anchor="middle">000092</text>
+<path d="M 1087.0 91.0 L 1090.0 83.0 L 1223.0 83.0 L 1226.0 91.0 L 1223.0 99.0 L 1090.0 99.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="1156.5" y="97.0" fill="#16181D" text-anchor="middle">000093</text>
+<text x="149" y="131" fill="#16181D" text-anchor="end">nd  naive direct</text>
+<path d="M 158.0 123.0 L 161.0 115.0 L 273.7 115.0 L 276.7 123.0 L 273.7 131.0 L 161.0 131.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="217.3" y="129.0" fill="#16181D" text-anchor="middle">00008d</text>
+<path d="M 276.7 123.0 L 279.7 115.0 L 511.0 115.0 L 514.0 123.0 L 511.0 131.0 L 279.7 131.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="395.3" y="129.0" fill="#16181D" text-anchor="middle">00008e</text>
+<path d="M 514.0 123.0 L 517.0 115.0 L 629.7 115.0 L 632.7 123.0 L 629.7 131.0 L 517.0 131.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="573.3" y="129.0" fill="#16181D" text-anchor="middle">00008f</text>
+<path d="M 632.7 123.0 L 635.7 115.0 L 748.3 115.0 L 751.3 123.0 L 748.3 131.0 L 635.7 131.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="692.0" y="129.0" fill="#16181D" text-anchor="middle">000080</text>
+<path d="M 751.3 123.0 L 754.3 115.0 L 867.0 115.0 L 870.0 123.0 L 867.0 131.0 L 754.3 131.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="810.7" y="129.0" fill="#16181D" text-anchor="middle">000090</text>
+<path d="M 870.0 123.0 L 873.0 115.0 L 1104.3 115.0 L 1107.3 123.0 L 1104.3 131.0 L 873.0 131.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="988.7" y="129.0" fill="#16181D" text-anchor="middle">000091</text>
+<path d="M 1107.3 123.0 L 1110.3 115.0 L 1223.0 115.0 L 1226.0 123.0 L 1223.0 131.0 L 1110.3 131.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="1166.7" y="129.0" fill="#16181D" text-anchor="middle">000092</text>
+<text x="149" y="163" fill="#16181D" text-anchor="end">n2  naive 2FF</text>
+<path d="M 158.0 155.0 L 161.0 147.0 L 273.7 147.0 L 276.7 155.0 L 273.7 163.0 L 161.0 163.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="217.3" y="161.0" fill="#16181D" text-anchor="middle">00008d</text>
+<path d="M 276.7 155.0 L 279.7 147.0 L 511.0 147.0 L 514.0 155.0 L 511.0 163.0 L 279.7 163.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="395.3" y="161.0" fill="#16181D" text-anchor="middle">00008e</text>
+<path d="M 514.0 155.0 L 517.0 147.0 L 629.7 147.0 L 632.7 155.0 L 629.7 163.0 L 517.0 163.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="573.3" y="161.0" fill="#16181D" text-anchor="middle">00008f</text>
+<path d="M 632.7 155.0 L 635.7 147.0 L 748.3 147.0 L 751.3 155.0 L 748.3 163.0 L 635.7 163.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="692.0" y="161.0" fill="#16181D" text-anchor="middle">000080</text>
+<path d="M 751.3 155.0 L 754.3 147.0 L 867.0 147.0 L 870.0 155.0 L 867.0 163.0 L 754.3 163.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="810.7" y="161.0" fill="#16181D" text-anchor="middle">000090</text>
+<path d="M 870.0 155.0 L 873.0 147.0 L 1104.3 147.0 L 1107.3 155.0 L 1104.3 163.0 L 873.0 163.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="988.7" y="161.0" fill="#16181D" text-anchor="middle">000091</text>
+<path d="M 1107.3 155.0 L 1110.3 147.0 L 1223.0 147.0 L 1226.0 155.0 L 1223.0 163.0 L 1110.3 163.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="1166.7" y="161.0" fill="#16181D" text-anchor="middle">000092</text>
+<text x="149" y="195" fill="#16181D" text-anchor="end">gray_bin  2FF sync</text>
+<path d="M 158.0 187.0 L 161.0 179.0 L 273.7 179.0 L 276.7 187.0 L 273.7 195.0 L 161.0 195.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="217.3" y="193.0" fill="#16181D" text-anchor="middle">00008d</text>
+<path d="M 276.7 187.0 L 279.7 179.0 L 511.0 179.0 L 514.0 187.0 L 511.0 195.0 L 279.7 195.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="395.3" y="193.0" fill="#16181D" text-anchor="middle">00008e</text>
+<path d="M 514.0 187.0 L 517.0 179.0 L 748.3 179.0 L 751.3 187.0 L 748.3 195.0 L 517.0 195.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="632.7" y="193.0" fill="#16181D" text-anchor="middle">00008f</text>
+<path d="M 751.3 187.0 L 754.3 179.0 L 867.0 179.0 L 870.0 187.0 L 867.0 195.0 L 754.3 195.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="810.7" y="193.0" fill="#16181D" text-anchor="middle">000090</text>
+<path d="M 870.0 187.0 L 873.0 179.0 L 1104.3 179.0 L 1107.3 187.0 L 1104.3 195.0 L 873.0 195.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="988.7" y="193.0" fill="#16181D" text-anchor="middle">000091</text>
+<path d="M 1107.3 187.0 L 1110.3 179.0 L 1223.0 179.0 L 1226.0 187.0 L 1223.0 195.0 L 1110.3 195.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="1166.7" y="193.0" fill="#16181D" text-anchor="middle">000092</text>
+<text x="149" y="227" fill="#16181D" text-anchor="end">tear_nd</text>
+<path d="M 158.0 219.0 L 161.0 211.0 L 748.3 211.0 L 751.3 219.0 L 748.3 227.0 L 161.0 227.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="454.7" y="225.0" fill="#16181D" text-anchor="middle">00000000</text>
+<path d="M 751.3 219.0 L 754.3 211.0 L 1223.0 211.0 L 1226.0 219.0 L 1223.0 227.0 L 754.3 227.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="988.7" y="225.0" fill="#16181D" text-anchor="middle">00000001</text>
+<line x1="632.7" y1="10" x2="632.7" y2="244" stroke="#93332A" stroke-width="1.3" stroke-dasharray="4 3"/>
+<text x="637.7" y="21" fill="#93332A" font-weight="700">TORN  nd = 000080</text>
+</svg>

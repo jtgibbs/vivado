@@ -1,0 +1,110 @@
+<svg viewBox="0 0 1240 264" xmlns="http://www.w3.org/2000/svg" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" role="img" aria-label="waveform"><title>Vivado flow: post-implementation SDF-annotated, tear trapped at 8368.499 ns</title><rect x="0" y="0" width="1240" height="264" fill="#FFFFFF"/>
+<line x1="158.0" y1="10" x2="158.0" y2="244" stroke="#D8D6CE" stroke-width="0.5"/>
+<text x="158.0" y="258" fill="#7C818B" text-anchor="middle">8330</text>
+<line x1="264.8" y1="10" x2="264.8" y2="244" stroke="#D8D6CE" stroke-width="0.5"/>
+<text x="264.8" y="258" fill="#7C818B" text-anchor="middle">8338</text>
+<line x1="371.6" y1="10" x2="371.6" y2="244" stroke="#D8D6CE" stroke-width="0.5"/>
+<text x="371.6" y="258" fill="#7C818B" text-anchor="middle">8346</text>
+<line x1="478.4" y1="10" x2="478.4" y2="244" stroke="#D8D6CE" stroke-width="0.5"/>
+<text x="478.4" y="258" fill="#7C818B" text-anchor="middle">8354</text>
+<line x1="585.2" y1="10" x2="585.2" y2="244" stroke="#D8D6CE" stroke-width="0.5"/>
+<text x="585.2" y="258" fill="#7C818B" text-anchor="middle">8362</text>
+<line x1="692.0" y1="10" x2="692.0" y2="244" stroke="#D8D6CE" stroke-width="0.5"/>
+<text x="692.0" y="258" fill="#7C818B" text-anchor="middle">8370</text>
+<line x1="798.8" y1="10" x2="798.8" y2="244" stroke="#D8D6CE" stroke-width="0.5"/>
+<text x="798.8" y="258" fill="#7C818B" text-anchor="middle">8378</text>
+<line x1="905.6" y1="10" x2="905.6" y2="244" stroke="#D8D6CE" stroke-width="0.5"/>
+<text x="905.6" y="258" fill="#7C818B" text-anchor="middle">8386</text>
+<line x1="1012.4" y1="10" x2="1012.4" y2="244" stroke="#D8D6CE" stroke-width="0.5"/>
+<text x="1012.4" y="258" fill="#7C818B" text-anchor="middle">8394</text>
+<line x1="1119.2" y1="10" x2="1119.2" y2="244" stroke="#D8D6CE" stroke-width="0.5"/>
+<text x="1119.2" y="258" fill="#7C818B" text-anchor="middle">8402</text>
+<line x1="1226.0" y1="10" x2="1226.0" y2="244" stroke="#D8D6CE" stroke-width="0.5"/>
+<text x="1226.0" y="258" fill="#7C818B" text-anchor="middle">8410</text>
+<text x="1234" y="258" fill="#7C818B" text-anchor="end">ns</text>
+<text x="149" y="35" fill="#16181D" text-anchor="end">CLK 100 MHz</text>
+<path d="M 158.0 35.0 L 224.8 35.0 L 224.8 19.0 L 291.5 19.0 L 291.5 35.0 L 358.2 35.0 L 358.2 19.0 L 425.0 19.0 L 425.0 35.0 L 491.8 35.0 L 491.8 19.0 L 558.5 19.0 L 558.5 35.0 L 625.2 35.0 L 625.2 19.0 L 692.0 19.0 L 692.0 35.0 L 758.8 35.0 L 758.8 19.0 L 825.5 19.0 L 825.5 35.0 L 892.2 35.0 L 892.2 19.0 L 959.0 19.0 L 959.0 35.0 L 1025.8 35.0 L 1025.8 19.0 L 1092.5 19.0 L 1092.5 35.0 L 1159.2 35.0 L 1159.2 19.0 L 1226.0 19.0 L 1226.0 35.0 L 1226.0 35.0" fill="none" stroke="#1A5580" stroke-width="1.3"/>
+<text x="149" y="67" fill="#16181D" text-anchor="end">clk_async</text>
+<path d="M 158.0 67.0 L 182.1 67.0 L 182.1 51.0 L 286.0 51.0 L 286.0 67.0 L 390.0 67.0 L 390.0 51.0 L 493.9 51.0 L 493.9 67.0 L 598.1 67.0 L 598.1 51.0 L 702.2 51.0 L 702.2 67.0 L 806.5 67.0 L 806.5 51.0 L 910.7 51.0 L 910.7 67.0 L 1015.1 67.0 L 1015.1 51.0 L 1119.5 51.0 L 1119.5 67.0 L 1224.0 67.0 L 1224.0 51.0 L 1226.0 51.0" fill="none" stroke="#1A5580" stroke-width="1.3"/>
+<text x="149" y="99" fill="#16181D" text-anchor="end">hf_count  TRUTH</text>
+<path d="M 158.0 91.0 L 161.0 83.0 L 268.5 83.0 L 271.5 91.0 L 268.5 99.0 L 161.0 99.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="214.8" y="97.0" fill="#16181D" text-anchor="middle">0001f7</text>
+<path d="M 271.5 91.0 L 271.6 83.0 L 271.6 83.0 L 271.7 91.0 L 271.6 99.0 L 271.6 99.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<path d="M 271.7 91.0 L 274.7 83.0 L 476.4 83.0 L 479.4 91.0 L 476.4 99.0 L 274.7 99.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="375.5" y="97.0" fill="#16181D" text-anchor="middle">0001f8</text>
+<path d="M 479.4 91.0 L 482.4 83.0 L 684.5 83.0 L 687.5 91.0 L 684.5 99.0 L 482.4 99.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="583.4" y="97.0" fill="#16181D" text-anchor="middle">0001f9</text>
+<path d="M 687.5 91.0 L 687.6 83.0 L 687.6 83.0 L 687.6 91.0 L 687.6 99.0 L 687.6 99.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<path d="M 687.6 91.0 L 690.6 83.0 L 892.9 83.0 L 895.9 91.0 L 892.9 99.0 L 690.6 99.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="791.8" y="97.0" fill="#16181D" text-anchor="middle">0001fa</text>
+<path d="M 895.9 91.0 L 898.9 83.0 L 1101.6 83.0 L 1104.6 91.0 L 1101.6 99.0 L 898.9 99.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="1000.2" y="97.0" fill="#16181D" text-anchor="middle">0001fb</text>
+<path d="M 1104.6 91.0 L 1104.6 83.0 L 1104.6 83.0 L 1104.7 91.0 L 1104.6 99.0 L 1104.6 99.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<path d="M 1104.7 91.0 L 1107.7 83.0 L 1223.0 83.0 L 1226.0 91.0 L 1223.0 99.0 L 1107.7 99.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="1165.3" y="97.0" fill="#16181D" text-anchor="middle">0001fc</text>
+<text x="149" y="131" fill="#16181D" text-anchor="end">nd  naive direct</text>
+<path d="M 158.0 123.0 L 161.0 115.0 L 296.9 115.0 L 299.9 123.0 L 296.9 131.0 L 161.0 131.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="229.0" y="129.0" fill="#16181D" text-anchor="middle">0001f6</text>
+<path d="M 299.9 123.0 L 302.9 115.0 L 430.4 115.0 L 433.4 123.0 L 430.4 131.0 L 302.9 131.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="366.7" y="129.0" fill="#16181D" text-anchor="middle">0001f7</text>
+<path d="M 433.4 123.0 L 433.5 115.0 L 433.5 115.0 L 433.5 123.0 L 433.5 131.0 L 433.5 131.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<path d="M 433.5 123.0 L 436.5 115.0 L 697.4 115.0 L 700.4 123.0 L 697.4 131.0 L 436.5 131.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="567.0" y="129.0" fill="#16181D" text-anchor="middle">0001f8</text>
+<path d="M 700.4 123.0 L 703.4 115.0 L 964.4 115.0 L 967.4 123.0 L 964.4 131.0 L 703.4 131.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="833.9" y="129.0" fill="#16181D" text-anchor="middle">0001f9</text>
+<path d="M 967.4 123.0 L 967.5 115.0 L 967.5 115.0 L 967.5 123.0 L 967.5 131.0 L 967.5 131.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<path d="M 967.5 123.0 L 970.5 115.0 L 1097.9 115.0 L 1100.9 123.0 L 1097.9 131.0 L 970.5 131.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="1034.2" y="129.0" fill="#16181D" text-anchor="middle">0001fa</text>
+<path d="M 1100.9 123.0 L 1103.9 115.0 L 1223.0 115.0 L 1226.0 123.0 L 1223.0 131.0 L 1103.9 131.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="1163.5" y="129.0" fill="#16181D" text-anchor="middle">0001fb</text>
+<text x="149" y="163" fill="#16181D" text-anchor="end">n2  naive 2FF</text>
+<path d="M 158.0 155.0 L 161.0 147.0 L 295.5 147.0 L 298.5 155.0 L 295.5 163.0 L 161.0 163.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="228.3" y="161.0" fill="#16181D" text-anchor="middle">0001f6</text>
+<path d="M 298.5 155.0 L 301.5 147.0 L 429.0 147.0 L 432.0 155.0 L 429.0 163.0 L 301.5 163.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="365.3" y="161.0" fill="#16181D" text-anchor="middle">0001f7</text>
+<path d="M 432.0 155.0 L 432.3 147.0 L 432.3 147.0 L 432.6 155.0 L 432.3 163.0 L 432.3 163.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<path d="M 432.6 155.0 L 432.6 147.0 L 432.6 147.0 L 432.6 155.0 L 432.6 163.0 L 432.6 163.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<path d="M 432.6 155.0 L 435.6 147.0 L 696.0 147.0 L 699.0 155.0 L 696.0 163.0 L 435.6 163.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="565.8" y="161.0" fill="#16181D" text-anchor="middle">0001f8</text>
+<path d="M 699.0 155.0 L 702.0 147.0 L 963.0 147.0 L 966.0 155.0 L 963.0 163.0 L 702.0 163.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="832.5" y="161.0" fill="#16181D" text-anchor="middle">0001f9</text>
+<path d="M 966.0 155.0 L 966.3 147.0 L 966.3 147.0 L 966.6 155.0 L 966.3 163.0 L 966.3 163.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<path d="M 966.6 155.0 L 969.6 147.0 L 1096.5 147.0 L 1099.5 155.0 L 1096.5 163.0 L 969.6 163.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="1033.1" y="161.0" fill="#16181D" text-anchor="middle">0001fa</text>
+<path d="M 1099.5 155.0 L 1102.5 147.0 L 1223.0 147.0 L 1226.0 155.0 L 1223.0 163.0 L 1102.5 163.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="1162.8" y="161.0" fill="#16181D" text-anchor="middle">0001fb</text>
+<text x="149" y="195" fill="#16181D" text-anchor="end">gray_bin  2FF sync</text>
+<path d="M 158.0 187.0 L 161.0 179.0 L 314.6 179.0 L 317.6 187.0 L 314.6 195.0 L 161.0 195.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="237.8" y="193.0" fill="#16181D" text-anchor="middle">xxxxxx</text>
+<path d="M 317.6 187.0 L 320.6 179.0 L 444.7 179.0 L 447.7 187.0 L 444.7 195.0 L 320.6 195.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="382.6" y="193.0" fill="#16181D" text-anchor="middle">xxxxxx</text>
+<path d="M 447.7 187.0 L 450.7 179.0 L 452.5 179.0 L 455.5 187.0 L 452.5 195.0 L 450.7 195.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<path d="M 455.5 187.0 L 455.6 179.0 L 455.6 179.0 L 455.7 187.0 L 455.6 195.0 L 455.6 195.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<path d="M 455.7 187.0 L 455.7 179.0 L 455.7 179.0 L 455.8 187.0 L 455.7 195.0 L 455.7 195.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<path d="M 455.8 187.0 L 458.8 179.0 L 715.1 179.0 L 718.1 187.0 L 715.1 195.0 L 458.8 195.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="586.9" y="193.0" fill="#16181D" text-anchor="middle">xxxxxx</text>
+<path d="M 718.1 187.0 L 721.1 179.0 L 978.0 179.0 L 981.0 187.0 L 978.0 195.0 L 721.1 195.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="849.5" y="193.0" fill="#16181D" text-anchor="middle">xxxxxx</text>
+<path d="M 981.0 187.0 L 984.0 179.0 L 1115.6 179.0 L 1118.6 187.0 L 1115.6 195.0 L 984.0 195.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="1049.8" y="193.0" fill="#16181D" text-anchor="middle">xxxxxx</text>
+<path d="M 1118.6 187.0 L 1121.6 179.0 L 1223.0 179.0 L 1226.0 187.0 L 1223.0 195.0 L 1121.6 195.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="1172.3" y="193.0" fill="#16181D" text-anchor="middle">xxxxxx</text>
+<text x="149" y="227" fill="#16181D" text-anchor="end">gray_naked  no sync</text>
+<path d="M 158.0 219.0 L 161.0 211.0 L 163.5 211.0 L 166.5 219.0 L 163.5 227.0 L 161.0 227.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<path d="M 166.5 219.0 L 169.5 211.0 L 296.1 211.0 L 299.1 219.0 L 296.1 227.0 L 169.5 227.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="232.8" y="225.0" fill="#16181D" text-anchor="middle">0001f7</text>
+<path d="M 299.1 219.0 L 302.1 211.0 L 429.9 211.0 L 432.9 219.0 L 429.9 227.0 L 302.1 227.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="366.0" y="225.0" fill="#16181D" text-anchor="middle">0001ff</text>
+<path d="M 432.9 219.0 L 433.2 211.0 L 433.2 211.0 L 433.5 219.0 L 433.2 227.0 L 433.2 227.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<path d="M 433.5 219.0 L 436.5 211.0 L 564.0 211.0 L 567.0 219.0 L 564.0 227.0 L 436.5 227.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="500.2" y="225.0" fill="#16181D" text-anchor="middle">0001f8</text>
+<path d="M 567.0 219.0 L 570.0 211.0 L 830.4 211.0 L 833.4 219.0 L 830.4 227.0 L 570.0 227.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="700.2" y="225.0" fill="#16181D" text-anchor="middle">0001f9</text>
+<path d="M 833.4 219.0 L 833.7 211.0 L 833.7 211.0 L 834.0 219.0 L 833.7 227.0 L 833.7 227.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<path d="M 834.0 219.0 L 837.0 211.0 L 964.5 211.0 L 967.5 219.0 L 964.5 227.0 L 837.0 227.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="900.7" y="225.0" fill="#16181D" text-anchor="middle">0001fa</text>
+<path d="M 967.5 219.0 L 970.5 211.0 L 1223.0 211.0 L 1226.0 219.0 L 1223.0 227.0 L 970.5 227.0 Z" fill="#EDF3F8" stroke="#1A5580" stroke-width="0.9"/>
+<text x="1096.7" y="225.0" fill="#16181D" text-anchor="middle">0001fb</text>
+<line x1="672.0" y1="10" x2="672.0" y2="244" stroke="#93332A" stroke-width="1.3" stroke-dasharray="4 3"/>
+<text x="677.0" y="21" fill="#93332A" font-weight="700">TEAR TRAPPED</text>
+</svg>

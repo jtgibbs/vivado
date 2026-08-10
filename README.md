@@ -33,6 +33,7 @@ precisely because its answers are already known.
 |---|---|
 | [`cdc_corruption_a7/`](cdc_corruption_a7/) | 🔧 First payload. One async counter read five ways — two correct, three deliberately wrong — through a full non-project Vivado flow: XSim behavioral + post-implementation timing simulation, `report_cdc` audit, trap-on-event waveform capture. |
 | [`SETUP.md`](SETUP.md) | EC2 instance sizing, Vivado install, licensing, cost, teardown. Sized from AMD's own memory table rather than folk wisdom; the answer is smaller than most people expect. |
+| [`docs/two-toolchains.md`](docs/two-toolchains.md) | What the open flow and the vendor flow can each see, run against byte-identical RTL — tool inventories, the AWS architecture, the same failure captured in both, and four cases of a tool reporting success while failing. |
 
 Planned:
 

@@ -348,6 +348,12 @@ the XDC are the only board-specific lines.
 
 ## Measured — Vivado 2025.2 on EC2, xc7a35ticsg324-1L
 
+> For the cross-flow comparison — what the open iCE40 toolchain and Vivado can
+> each see, the AWS architecture, and the methodology failures found along the way
+> — see [`docs/two-toolchains.md`](../docs/two-toolchains.md). This section is the
+> stage-by-stage record; that document is the argument.
+
+
 First real run of the vendor flow, 2026-08-10.
 
 ### CDC audit — known-answer check PASS
