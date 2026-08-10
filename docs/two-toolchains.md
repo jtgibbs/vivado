@@ -24,6 +24,37 @@ list and the full measured results.
 
 ---
 
+## Three things called "metastability"
+
+These get conflated constantly, including in this project's own earlier wording.
+They are different observables, measured by different means, and the numbers only
+look contradictory until you separate them.
+
+| | What it is | Where measured here | Count |
+|---|---|---|---|
+| **Setup/hold violation** | Data changed inside the capture window — the *precondition* | Vivado post-implementation, SDF-annotated | **47,798** |
+| **Metastability event** | A flop failing to resolve within the time allowed | iCE40 rig: two independent synchronizer chains, counting disagreements | **0** |
+| **Tear** | An incoherent multi-bit read — the *consequence* | iCE40 `cdc_corruption`, hardware counters | **46k–114k/s** |
+
+**No metastability event has been harvested anywhere in this project** — not on
+hardware, not in Vivado. Zero is the correct hardware result: at 12 MHz the first
+flop gets a full 83 ns to settle, t_r/τ ≈ 250, so events are astronomically rare.
+Harvesting them honestly needs a deliberately shrunken settling window.
+
+Two clarifications that matter when reading the Vivado numbers:
+
+`$setuphold` is a **dynamic** check, not a static one. It fires because a transition
+*did* land inside the window on that clock edge with those back-annotated delays —
+the log reports actual timestamps. The "could it violate" question belongs to STA,
+which analyses paths without stimulus. Timing simulation answers "did it, here".
+
+**X does not mean metastability occurred.** It means data changed inside the
+aperture and the simulator declines to predict the outcome. On silicon the
+overwhelming majority of such captures resolve correctly and promptly — that is the
+entire MTBF story. X is pessimism, not observation.
+
+---
+
 ## Flow one — open toolchain and hardware
 
 Free, local, and fast enough to run on every commit. The board is the point: it
@@ -60,12 +91,27 @@ than sampling from the host is the entire reason the number means anything.
 | naive per-bit 2FF | *Every bit* through a 2-flop synchronizer | 46,078 | **tears** |
 | gray, no sync | Gray decoded from the raw async bus | 113,893 | **worse** |
 
-Two results worth internalising. **Per-bit two-flop synchronization is exactly as
-broken as naive** — identical counts. It fixes metastability per bit and leaves
-multi-bit *coherence* untouched, so the assembled word is one the counter never
-held. And **gray coding without a synchronizer is worse than naive**, because the
-gray→binary decoder is a fan-out XOR cascade that amplifies the single metastable
-bit. Gray fixes coherence; flops fix metastability. Orthogonal, and you need both.
+Two results worth internalising.
+
+**Per-bit two-flop synchronization is exactly as broken as naive** — identical
+counts. It fixes metastability per bit and leaves multi-bit *coherence* untouched,
+so the assembled word is one the counter never held.
+
+That pair is also a **controlled experiment on the cause**. The 2FF path handles
+metastability per bit by construction; if metastability were driving the tearing it
+would tear *less*. It tears exactly the same. So these tears are coherence failure —
+they would occur even if every flop resolved instantly and cleanly. Failure without
+metastability, measured rather than argued.
+
+**Gray coding without a synchronizer is worse than naive.** Gray guarantees that
+sampling the bus mid-transition yields old-or-new, either of which is legal — but
+that path decodes *combinationally before* capturing. The XOR cascade converts a
+single-bit gray transition into a **multi-bit** binary transition whose bits reach
+the capture register at different times, which throws the guarantee away.
+Metastability may contribute too, since nothing resolves a marginal capture here,
+but the coherence argument alone accounts for the failure and a tear counter cannot
+apportion the two. Gray fixes coherence; flops fix metastability. Orthogonal, and
+you need both.
 
 ---
 
@@ -350,9 +396,10 @@ anything touches EC2.
 ## What is not proven
 
 - **No MTBF numbers.** `report_synchronizer_mtbf` is unsupported on the 7a35ti.
-- **No metastability events harvested.** At 12 MHz an iCE40 flop gets 83 ns to
-  resolve (t_r/τ ≈ 250), so zero events is the *correct* result and no amount of
-  patience changes it. Honest harvesting needs a deliberately shrunken settling
+- **No metastability events harvested.** Zero, on the dedicated rig — see
+  [Three things called "metastability"](#three-things-called-metastability) for why
+  that is the *correct* result and how it coexists with 47,798 setup/hold violations
+  and 114k torn reads/s. Honest harvesting needs a deliberately shrunken settling
   window — an MMCM with dynamic phase shift.
 - **Timing simulation cannot confirm a synchronizer works.** X-pessimism means the
   correct gray + 2FF path reads `xxxxxx` in the annotated run.
