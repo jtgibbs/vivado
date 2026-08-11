@@ -2,8 +2,10 @@
 
 A prior iCE40 project proved this failure **on real hardware**: one async counter
 read five ways, three of them wrong, tearing tens of thousands of times a second
-(numbers below). What it could not prove was anything about the *tools* — the
-open iCE40 flow has no CDC checker and thin STA, and it built an unsynchronized
+(numbers below). What it could not prove was anything about the *tools*. The
+open iCE40 flow does do per-clock static timing — `nextpnr` reports both domains
+passing — but it has no CDC checker, no way to *express* a clock relationship,
+and no report of the crossings between domains. It built an unsynchronized
 crossing without a single warning.
 
 This port runs the identical RTL through Vivado to answer the other half:
@@ -35,8 +37,13 @@ Three findings, and they are why this design is a good calibration target:
    problem, and the assembled word is one the counter never held.
 2. **Gray coding does not remove the need for a synchronizer.** Gray fixes
    coherence, flops fix metastability — orthogonal, and you need both. Gray with
-   no synchronizer is *worse* than naive, because the gray→binary decoder is a
-   fan-out XOR cascade that amplifies the one metastable bit.
+   no synchronizer is *worse* than naive because that path decodes
+   *combinationally before* capturing: the XOR cascade turns a single-bit gray
+   transition into a multi-bit binary one, and the spread is structural —
+   `bin[23]` is a bare wire while `bin[0]` is the XOR of all 24 gray bits, so
+   logic depth is graded across the bus by construction. Metastability may
+   contribute, but the coherence argument alone accounts for it and a tear
+   counter cannot apportion the two.
 3. **It looks fine ~99.5% of the time.** That is exactly why these bugs pass
    casual testing and fail in the field.
 
@@ -96,7 +103,7 @@ is fine — precisely the failure this project exists to expose.
 | behavioral simulation | **perfect** — no setup/hold model, every sample deterministic |
 | behavioral + injected skew | **wrong numbers** — real mechanism, meaningless rate |
 | post-implementation timing sim | **X** — SDF `$setuphold` fires, SIMPRIM drives unknown |
-| iCEBreaker hardware | **wrong numbers**, ~61k/s |
+| iCEBreaker hardware | **wrong numbers** — 46,078/s naive, 113,893/s gray-no-sync |
 
 Behavioral sim is the lie the iCE40 cocotb testbench already documents. Timing
 sim is the tool admitting it cannot know. Hardware is the truth. X is not what
@@ -106,7 +113,8 @@ unknowable" and go to the board for what it resolves to.
 
 This is why post-implementation timing simulation is the piece worth having and
 the piece almost nobody runs. It is the only simulation that models the
-phenomenon at all.
+*preconditions* — real setup/hold windows on a routed netlist. It still does not
+model metastability resolving, which is why its answer is X rather than a value.
 
 ## Use
 
@@ -158,7 +166,8 @@ make timing
 make cdc
 ```
 
-Waveforms land in `build/cdc_corruption_a7.vcd` (`make wave` opens GTKWave),
+Waveforms land in `build/cdc_corruption_a7.vcd` (`make wave` — prefers Surfer,
+falls back to GTKWave; see the Makefile note on why GTKWave is dead on macOS 26),
 reports in `build/cdc/`, and the routed checkpoint opens in the GUI over DCV
 with `make gui`.
 
@@ -307,9 +316,11 @@ aperture.
   marked *Asynchronous Groups* here and *Critical* there is a crossing someone
   waived in the timing report without fixing in the RTL. That pairing is the
   whole audit.
-- **`report_synchronizer_mtbf`** — only reports on `ASYNC_REG`-marked flops,
-  which is why the XDC marks them. An empty report means the property did not
-  stick, not that the design is safe.
+- **`report_synchronizer_mtbf`** — **unsupported on `7a35ti`.** Vivado returns
+  `[Vivado 12-3426] Metastability report is not supported for device 7a35ti`, so
+  this flow produces no MTBF numbers at all. The `catch` in `report_cdc.tcl`
+  handles it. On a device that does support it, it reports only on
+  `ASYNC_REG`-marked flops — which is one reason the flops are marked.
 - **`check_timing`** and **`report_exceptions -ignored`** — unconstrained
   endpoints, and `set_false_path`/`set_max_delay` statements that match nothing
   and are quietly doing zero while everyone assumes they are load-bearing.
@@ -337,11 +348,12 @@ a green timing summary is not evidence of a safe design.
 | `top_a7.v` | Artix-7 top: async clock source, unchanged RTL underneath |
 | `cdc_corruption_a7.xdc` | Arty A7-35T pins, clocks, CDC constraints + waivers |
 | `tb_cdc_corruption.sv` | XSim testbench — pin-level, so one TB drives behavioral, post-synth and timing sim |
-| `run.tcl` | non-project flow: behav / synth / cdc / impl / timing |
+| `run.tcl` | non-project flow: behav / synth / cdc / impl / timing / trap |
 | `report_cdc.tcl` | the CDC + constraint audit, with the known-answer check |
 | `unisim_stub.v` | stub `BUFG`/`STARTUPE2` for the laptop smoke test only |
 | `Makefile` | one word per stage |
 | [`../SETUP.md`](../SETUP.md) | EC2 instance sizing, Vivado install, cost, first-run sequence |
+| [`../docs/two-toolchains.md`](../docs/two-toolchains.md) | The cross-flow comparison — what each toolchain can and cannot see |
 
 Target is the Arty A7-35T (`xc7a35ticsg324-1L`); the part and the pin section of
 the XDC are the only board-specific lines.
@@ -404,14 +416,21 @@ exactly as the theory predicts:
 | `u_hs/stamp_q_reg`, `u_hs/data_reg` | **0** | handshake |
 
 Violations on stage 1 of the *correct* gray path are not a defect — absorbing
-metastability is precisely what stage 1 exists to do. The discriminator is stage
-2: it is clean, and so is the handshake. The naive paths have no stage 2.
+metastability is precisely what stage 1 exists to do. Stage 2 takes none, and
+neither does the handshake; the naive paths have no stage 2 at all. That is a
+real structural result and it is what the violation census is good for.
 
-**Known limitation:** under full SDF annotation the UART readout does not
-complete — X from the violations propagates and the register read hangs, so
-there is no tear-count table from this run. That is the simulator declining to
-guess, which is the honest answer, but it means the *rate* has to come from
-hardware. Run wall time was 14 minutes for 30 us simulated.
+**But do not over-read it.** In the trapped waveform the correctly synchronized
+`gray_bin` output reads `xxxxxx`: X from the stage-1 violation propagates
+straight through stage 2, because the simulator cannot model metastability
+*resolving*. Timing simulation is **X-pessimistic across every synchronizer** —
+it renders working and broken CDC identically at the data level. It tells you
+*which flops are being hit*, not *which designs survive*. Structure comes from
+`report_cdc`; behaviour comes from silicon.
+
+**Known limitation:** that same X propagation hangs the UART readout under full
+annotation, so there is no tear-count table from this run and the *rate* has to
+come from hardware. Run wall time was 14 minutes for 30 us simulated.
 
 ### Implementation
 
@@ -451,18 +470,20 @@ expected answer was known in advance and the check refused to pass without it.
 
 ## Status
 
-**Verified locally as far as it can be.** `make smoke` passes: the design
-elaborates, the UART model and all ten registers work, all five reads return
-coherent values, all tear counters read zero — which is the correct behavioral
-result and the reason this port exists. `make trap-skew` passes: two-pass
-trigger, first tear caught at 2345 ns, 400 ns window dumped at 27 KB instead of
-5.7 MB. The trigger and windowing mechanism the Vivado `trap` stage depends on
-is therefore proven; only the `run.tcl` wrapper around it is unrun.
+**Run under Vivado 2025.2 on EC2, 2026-08-10.** `synth`, `cdc`, `impl`,
+`timing` and `trap` have all executed against real silicon models — see
+[Measured](#measured--vivado-20252-on-ec2-xc7a35ticsg324-1l) above.
+[SETUP.md](../SETUP.md) has the instance sizing, install, cost and first-run
+sequence.
 
-**Run under Vivado 2025.2 on EC2, 2026-08-10** — see Measured above. `synth`,
-`cdc`, `impl`, `timing` and `trap` have all executed against real silicon models. [SETUP.md](../SETUP.md) has the instance sizing,
-install, cost and first-run sequence. Expect first-contact friction in two specific
-places, both commented where they will bite:
+**The laptop path also passes**, and is still the fast loop. `make smoke`: the
+design elaborates, the UART model and all ten registers work, all five reads
+return coherent values, all tear counters read zero — the correct behavioral
+result, and the reason this port exists. `make trap-skew`: two-pass trigger,
+first tear at 2345 ns, 400 ns window dumped at 27 KB instead of 5.7 MB.
+
+Two places bit on first contact and are commented where they will bite again on
+a different Vivado version:
 
 - the cell-name regexes in the XDC (`ASYNC_REG`, `set_max_delay`,
   `set_bus_skew`) and the `DONT_TOUCH` patterns in `run.tcl` — synthesized names
