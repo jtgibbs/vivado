@@ -8,7 +8,7 @@ into a lie, so the provenance is recorded rather than asserted.
 
 ## Source
 
-Private repository `jtgibbs/icebreaker`, commit
+[`jtgibbs/icebreaker`](https://github.com/jtgibbs/icebreaker), commit
 **`7322294215bb21c0a90af3cb4ba82c205d0abd44`** (`main`).
 
 | File | Path in source repo |
@@ -50,8 +50,8 @@ dependency, and its absence is the normal state here and on the EC2 instance.
 
 This directory has to `rsync` to a remote instance as one self-contained tree,
 with no repo, no network and nothing to resolve on the far end. A submodule would
-reintroduce exactly the dependency the copies exist to remove — and would make a
-private repo a hard requirement for building a public one.
+reintroduce exactly the dependency the copies exist to remove, for no gain: the
+digests above already make the provenance checkable.
 
 The cost of copying is drift. The digests above are what make drift detectable
 without trusting anyone's memory.

@@ -49,8 +49,8 @@ Three findings, and they are why this design is a good calibration target:
 
 The RTL that produced those numbers is in [`rtl/`](rtl/), byte-identical, with
 digests and source commit recorded in [`rtl/PROVENANCE.md`](rtl/PROVENANCE.md).
-The iCE40 repo is private; the numbers above and the digests are what let this
-project stand on its own.
+The numbers above and the digests are what let this project stand on its own,
+independently of that repo.
 
 ## What is actually ported
 
@@ -73,9 +73,9 @@ make check-sync
 ```
 
 diffs every file in `rtl/` against its iCE40 original and fails on drift. It needs
-a checkout of the (private) source repo — `make check-sync
-ICEBREAKER=/path/to/icebreaker` — and skips cleanly when there isn't one, which
-is the normal state here and on the instance. For verification without any
+a checkout of the source repo — `make check-sync ICEBREAKER=/path/to/icebreaker`
+— and skips cleanly when there isn't one, which is the normal state here and on
+the instance. For verification without any
 access to that repo, [`rtl/PROVENANCE.md`](rtl/PROVENANCE.md) carries SHA-256
 digests and the exact source commit.
 
