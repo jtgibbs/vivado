@@ -5,8 +5,11 @@ which does not run on Apple Silicon macOS — it is x86-64 Linux/Windows only, a
 emulating it locally on an M4 would be slower than the network round trip. So:
 a Linux EC2 instance, Vivado ML Standard, DCV when a GUI is actually needed.
 
-Nothing here has been executed yet. These are the sized, sourced decisions, not
-a transcript of a working install.
+**This has all been run.** The instance was provisioned and Vivado installed on
+2026-08-10; `synth`, `cdc`, `impl`, `timing` and `trap` all executed against real
+silicon models. Results are in the [project README](cdc_corruption_a7/README.md).
+What follows is the sizing reasoning and the install sequence as actually performed,
+with the figures that turned out to matter.
 
 ---
 
@@ -134,20 +137,43 @@ launching the instance, not after.
    volume and the install; terminating destroys the ~50 GB Vivado install you
    waited on.
 
-## Expected first-contact failures
+## What actually went wrong on first contact
 
-Called out where they will bite, but worth knowing in advance:
+This section used to predict three failures. Two of the three predictions were
+wrong, and the ones that did bite were not on the list — which is itself the
+lesson, so the record stays rather than being quietly rewritten.
 
-- **Cell-name patterns.** The `ASYNC_REG` / `set_max_delay` / `set_bus_skew`
-  selectors in the XDC and the `DONT_TOUCH` patterns in `run.tcl` depend on how
-  the installed Vivado version names synthesized cells. `report_cdc.tcl` is built
-  to fail loudly on zero Critical findings rather than emit a falsely clean
-  report, so a miss announces itself.
-- **`-generic_top` and `-sdfmax`.** Parameter override reaching the testbench,
-  and `/tb_cdc_corruption/dut` resolving for SDF annotation.
-- **`CLOCK_DEDICATED_ROUTE`.** `ck_ja0` is not a clock-capable pin; the waiver is
-  in the XDC with its justification. If the version disagrees about the net name,
-  placement fails with a clear message.
+**Predicted and did NOT happen:** cell-name patterns all matched on 2025.2
+(`ASYNC_REG` on 52 cells, both safe buses bounded 24→24, `DONT_TOUCH` 24 cells per
+path). `CLOCK_DEDICATED_ROUTE` was a non-event — placement never complained.
+
+**Predicted and DID happen, differently than expected:** `-sdfmax` failed, but not
+over `/tb_cdc_corruption/dut` resolving. It failed on **escaped instance names** —
+post-route cells like `hf_count[0]_i_1` contain brackets, and XSim skipped **1486
+of 1487** instances one warning at a time while still printing
+`[XSIM 43-3452] SDF backannotation was successful` for the file. A timing simulation
+with no timing. Fixed with `write_verilog -sdf_anno true`, which lets the netlist
+self-annotate: skips went 1486 → 0.
+
+**Not predicted at all, and the one that cost the most:**
+
+- **XDC is not Tcl.** Vivado's constraint reader is a restricted command set. `if`
+  is rejected as a *CRITICAL WARNING, not an error*, so the block is skipped and the
+  run continues looking healthy. The conditional creating `clk_async` never executed,
+  the design synthesized with a single clock, and `report_cdc` truthfully reported
+  zero crossings in a design made entirely of crossings. Anything needing a guard now
+  lives in `run.tcl`, which is real Tcl.
+- **`report_cdc -return_string` needs `-details`.** Without it you get the
+  per-clock-pair summary, which carries no `CDC-nn` rule ID, so ID-based parsing
+  matches nothing. The audit gate reported "zero Critical findings" against a report
+  listing 72.
+- **`report_synchronizer_mtbf` is unsupported on `7a35ti`** — `[Vivado 12-3426]`.
+  No MTBF numbers from this flow at all, on any device in this family.
+
+The two that matter are the middle pair: both were **tools reporting success at one
+level while failing completely at another**, and both would have produced a
+confident, wrong writeup. The only reason either was caught is that the expected
+answer was known in advance and the gate refused to pass without it.
 
 ## Sources
 
